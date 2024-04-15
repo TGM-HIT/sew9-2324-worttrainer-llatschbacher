@@ -13,18 +13,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class Rechtschreibtrainer {
+/**
+ * Die Klasse beinhaltet Methode zur Erstellung eines Rechtschreibtrainers
+ * @author jakob ertl
+ * @version 03.10.2023
+ */
+public class Rechtschreibtrainer implements SaveStrategy {
     private ArrayList<WortPaar> wortPaare;
     private int richtigW;
     private int falschW;
     private String currentWord;
     private String currentUrl;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private JsonNode jsonNode = objectMapper.readTree(new File("C:\\Users\\jakob\\IdeaProjects\\WortTrainerReloaded\\src\\main\\java\\at\\ac\\tgm\\jertl2\\data.json"));
     private boolean falschG;
 
 
 
-    public Rechtschreibtrainer() {
+    public Rechtschreibtrainer() throws IOException {
         wortPaare = new ArrayList<>();
         richtigW = 0;
         falschW = 0;
@@ -33,9 +40,10 @@ public class Rechtschreibtrainer {
     }
 
     private void loadWortpaareFromJson() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(new File("C:\\Users\\jakob\\IdeaProjects\\WortTrainerReloaded\\src\\main\\java\\at\\ac\\tgm\\jertl2\\data.json"));
-        JsonNode wortpaareNode = jsonNode.path("Wortpaare");
+        JsonNode wortpaareNode = this.jsonNode.path("Wortpaare");
+        JsonNode statistikNode = this.jsonNode.path("Statistik");
+        richtigW = statistikNode.get("richtig").asInt();
+        falschW = statistikNode.get("falsch").asInt();
 
         for (int i = 0; i < wortpaareNode.size(); i++) {
             JsonNode randomWortpaarNode = wortpaareNode.get(i);
@@ -100,12 +108,7 @@ public class Rechtschreibtrainer {
     }
 
     private void updateStatisticsInJson() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(new File("C:\\Users\\jakob\\IdeaProjects\\WortTrainerReloaded\\src\\main\\java\\at\\ac\\tgm\\jertl2\\data.json"));
-        ObjectNode statNode = (ObjectNode) jsonNode.path("Statistik");
-        statNode.put("richtig", richtigW);
-        statNode.put("falsch", falschW);
-        objectMapper.writeValue(new File("C:\\Users\\jakob\\IdeaProjects\\WortTrainerReloaded\\src\\main\\java\\at\\ac\\tgm\\jertl2\\data.json"), jsonNode);
+        save(this.jsonNode);
     }
 
     public void runTraining() throws IOException {
@@ -117,5 +120,13 @@ public class Rechtschreibtrainer {
             displayOptionPane();
             updateStatisticsInJson();
         } while (!finished);
+    }
+
+    @Override
+    public void save(JsonNode node) throws IOException {
+        ObjectNode statNode = (ObjectNode) node.path("Statistik");
+        statNode.put("richtig", richtigW);
+        statNode.put("falsch", falschW);
+        objectMapper.writeValue(new File("C:\\Users\\jakob\\IdeaProjects\\WortTrainerReloaded\\src\\main\\java\\at\\ac\\tgm\\jertl2\\data.json"), node);
     }
 }
