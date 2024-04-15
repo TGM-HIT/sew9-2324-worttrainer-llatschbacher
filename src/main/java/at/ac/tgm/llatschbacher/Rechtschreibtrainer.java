@@ -15,42 +15,111 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Die Klasse beinhaltet Methode zur Erstellung eines Rechtschreibtrainers
- * @author jakob ertl
+ * @author latschbacher lukas
  * @version 03.10.2023
  */
-public class Rechtschreibtrainer implements SaveStrategy {
+public class Rechtschreibtrainer {
     private ArrayList<WortPaar> wortPaare;
     private int richtigW;
     private int falschW;
+
+    public ArrayList<WortPaar> getWortPaare() {
+        return wortPaare;
+    }
+
+    public void setWortPaare(ArrayList<WortPaar> wortPaare) {
+        this.wortPaare = wortPaare;
+    }
+
     private String currentWord;
     private String currentUrl;
 
+    private SaveStrategy saveStrategy;
+
+    public int getRichtigW() {
+        return richtigW;
+    }
+
+    public void setRichtigW(int richtigW) {
+        this.richtigW = richtigW;
+    }
+
+    public int getFalschW() {
+        return falschW;
+    }
+
+    public void setFalschW(int falschW) {
+        this.falschW = falschW;
+    }
+
+    public String getCurrentWord() {
+        return currentWord;
+    }
+
+    public void setCurrentWord(String currentWord) {
+        this.currentWord = currentWord;
+    }
+
+    public String getCurrentUrl() {
+        return currentUrl;
+    }
+
+    public void setCurrentUrl(String currentUrl) {
+        this.currentUrl = currentUrl;
+    }
+
+    public SaveStrategy getSaveStrategy() {
+        return saveStrategy;
+    }
+
+    public void setSaveStrategy(SaveStrategy saveStrategy) {
+        this.saveStrategy = saveStrategy;
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    public JsonNode getJsonNode() {
+        return jsonNode;
+    }
+
+    public void setJsonNode(JsonNode jsonNode) {
+        this.jsonNode = jsonNode;
+    }
+
+    public boolean isFalschG() {
+        return falschG;
+    }
+
+    public void setFalschG(boolean falschG) {
+        this.falschG = falschG;
+    }
+
     private ObjectMapper objectMapper = new ObjectMapper();
-    private JsonNode jsonNode = objectMapper.readTree(new File("C:\\Users\\jakob\\IdeaProjects\\WortTrainerReloaded\\src\\main\\java\\at\\ac\\tgm\\jertl2\\data.json"));
+    private JsonNode jsonNode = objectMapper.readTree(new File("/home/lukas/Documents/sew9-2324-worttrainer-llatschbacher/src/main/java/at/ac/tgm/llatschbacher/data.json"));
     private boolean falschG;
 
 
 
     public Rechtschreibtrainer() throws IOException {
         wortPaare = new ArrayList<>();
+        saveStrategy = new JSONSave();
         richtigW = 0;
         falschW = 0;
         currentWord = null;
         currentUrl = null;
     }
 
-    private void loadWortpaareFromJson() throws IOException {
-        JsonNode wortpaareNode = this.jsonNode.path("Wortpaare");
-        JsonNode statistikNode = this.jsonNode.path("Statistik");
-        richtigW = statistikNode.get("richtig").asInt();
-        falschW = statistikNode.get("falsch").asInt();
-
-        for (int i = 0; i < wortpaareNode.size(); i++) {
-            JsonNode randomWortpaarNode = wortpaareNode.get(i);
-            String wort = randomWortpaarNode.path(randomWortpaarNode.fieldNames().next()).get("Wort").asText();
-            String url = randomWortpaarNode.path(randomWortpaarNode.fieldNames().next()).get("URL").asText();
-            wortPaare.add(new WortPaar(wort, url));
-        }
+    private void loadWortpaare() throws IOException {
+        Rechtschreibtrainer rechtschreibtrainer = saveStrategy.load(new File("/home/lukas/Documents/sew9-2324-worttrainer-llatschbacher/src/main/java/at/ac/tgm/llatschbacher/data.json"));
+        this.richtigW = rechtschreibtrainer.getRichtigW();
+        this.falschW = rechtschreibtrainer.getFalschW();
+        this.wortPaare = rechtschreibtrainer.getWortPaare();
     }
 
     private void displayOptionPane() throws MalformedURLException, IOException {
@@ -108,25 +177,17 @@ public class Rechtschreibtrainer implements SaveStrategy {
     }
 
     private void updateStatisticsInJson() throws IOException {
-        save(this.jsonNode);
+        saveStrategy.save(this);
     }
 
     public void runTraining() throws IOException {
         boolean finished = false;
 
-        loadWortpaareFromJson();
+        loadWortpaare();
 
         do {
             displayOptionPane();
             updateStatisticsInJson();
         } while (!finished);
-    }
-
-    @Override
-    public void save(JsonNode node) throws IOException {
-        ObjectNode statNode = (ObjectNode) node.path("Statistik");
-        statNode.put("richtig", richtigW);
-        statNode.put("falsch", falschW);
-        objectMapper.writeValue(new File("C:\\Users\\jakob\\IdeaProjects\\WortTrainerReloaded\\src\\main\\java\\at\\ac\\tgm\\jertl2\\data.json"), node);
     }
 }

@@ -6,7 +6,7 @@ import java.net.URL;
 
 /**
  * Die Klasse WortPaar stellt ein WortPaar bestehend aus dem Wort und dem dazugehörigen Bild als URL da.
- * @author jakob ertl
+ * @author lukas latschbacher
  * @version 02.10.2023
  */
 public class WortPaar {

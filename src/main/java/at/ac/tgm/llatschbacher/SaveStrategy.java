@@ -1,9 +1,13 @@
 package at.ac.tgm.llatschbacher;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.File;
 import java.io.IOException;
 
 public interface SaveStrategy {
-    void save(JsonNode node) throws IOException;
+    void save(Rechtschreibtrainer rechtschreibtrainer) throws IOException;
+
+    Rechtschreibtrainer load(File file) throws IOException;
 }
