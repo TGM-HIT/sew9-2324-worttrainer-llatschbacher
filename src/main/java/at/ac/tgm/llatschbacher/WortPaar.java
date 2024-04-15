@@ -4,6 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+/**
+ * Die Klasse WortPaar stellt ein WortPaar bestehend aus dem Wort und dem dazugehörigen Bild als URL da.
+ * @author jakob ertl
+ * @version 02.10.2023
+ */
 public class WortPaar {
 
     private String wort;
@@ -21,6 +26,12 @@ public class WortPaar {
 
     }
 
+    /**
+     * Überprüft ob das Wort und die URL den gegeben Kriterien entspricht
+     * @param wort
+     * @param url
+     * @return true oder false
+     */
     public boolean check(String wort, String url) {
         if(wort==null || wort.isEmpty()) {
             return false;
@@ -33,4 +44,13 @@ public class WortPaar {
         }
 
     }
+
+    public String getWort() {
+        return this.wort;
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
 }
